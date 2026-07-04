@@ -59,7 +59,7 @@ Requires [Conda](https://docs.conda.io/en/latest/miniconda.html). No GPU needed 
 
 ```bash
 conda env create -f environment.yml
-conda activate footfall-fresh
+conda activate footfall-detection
 ```
 
 ## Usage

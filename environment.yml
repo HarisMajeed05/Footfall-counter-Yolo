@@ -1,4 +1,4 @@
-name: footfall-fresh
+name: footfall-detection
 channels:
   - conda-forge
   - defaults
