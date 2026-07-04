@@ -1,0 +1,17 @@
+conda env create -f environment.yml
+conda activate footfall-fresh
+python tools/select_line.py --source Test/Test2.mp4 --out line.json    
+python footfall_counter3.py --source Test/Test2.mp4 --model yolo11x.pt --conf 0.1 --line-config line.json --show --iou 0.3
+
+python footfall_counter3.py --webcam 0 --model yolo11n.pt --conf 0.1 --iou 0.3   
+
+
+11m
+11s
+
+
+yolo11n
+yolo11s
+yolo11m
+yolo11l
+yolo11x

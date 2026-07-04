@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.conda/
+
+# Model weights — large binaries, auto-downloaded by footfall_counter.py into Models/
+Models/*.pt
+Models/*.onnx
+
+# Test/input videos — large, personal footage, don't commit
+Test/*.mp4
+Test/*.avi
+Test/*.mov
+Test/*.mkv
+
+# Generated outputs
+Output/*.mp4
+Output/*.csv
+
+# Note: Line_Config/*.json is intentionally NOT ignored — small files, useful to keep/share
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Keep the folders themselves in git even though their contents are ignored
+!Models/.gitkeep
+!Test/.gitkeep
+!Output/.gitkeep
+!Line_Config/.gitkeep
