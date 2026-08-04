@@ -19,11 +19,6 @@
 
 Manual and sensor-based footfall counting can't reliably tell entry from exit and often double-counts people lingering near an entrance. This project solves that with real detection + tracking: each person is identified individually and counted exactly once per crossing direction.
 
-## Demo
-
-<!-- Add a screenshot or short GIF of the counter running here, e.g.: -->
-<!-- ![demo](docs/demo.gif) -->
-
 ---
 
 ## Table of contents
@@ -140,9 +135,3 @@ For a live webcam, no separate step is needed — a window opens automatically b
 
 **Model choice**, roughly fastest → most accurate: `yolo11n` < `yolo11s` < `yolo11m` (default) < `yolo11l` < `rtdetr-l` < `yolo11x`. Larger/more accurate models are significantly slower on CPU — benchmark on your own hardware before committing to one for production use.
 
-## Roadmap
-
-- [ ] Multiple counting lines for separate entry/exit gates
-- [ ] CSV export of every crossing event with a timestamp
-- [ ] Streamlit dashboard UI as an alternative to the CLI + preview window
-- [ ] Benchmark script to compare model/imgsz tradeoffs automatically
