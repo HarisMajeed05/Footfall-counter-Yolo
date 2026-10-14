@@ -1,56 +1,35 @@
-# 🚶 Footfall Counter
+# Footfall Counter
 
-**AI-powered people counter using YOLO + ByteTrack** — detects, tracks, and counts people entering/exiting a space in real time, with a persistent ID per person so no one is counted twice.
+Counts people entering and leaving a space from a video file or webcam. It uses YOLO (or RT-DETR) for detection and ByteTrack for tracking, so each person keeps one ID and is counted once per crossing.
 
 ![Python](https://img.shields.io/badge/python-3.10-blue)
 ![CPU](https://img.shields.io/badge/inference-CPU--only-lightgrey)
 
----
+## Features
 
-## What it does
-
-- Detects every person in a video or live webcam feed using a YOLO/RT-DETR model
-- Assigns each person a persistent tracking ID (ByteTrack) so the same person is recognized across frames, even through brief occlusion
-- Counts **Entry** and **Exit** separately when someone crosses a virtual line — drawn at any angle, not just horizontal
-- Overlays bounding boxes, IDs, the counting line, and running totals directly on the video, so every count can be visually verified against the footage
-- Runs entirely on CPU — no GPU required
-
-## Why
-
-Manual and sensor-based footfall counting can't reliably tell entry from exit and often double-counts people lingering near an entrance. This project solves that with real detection + tracking: each person is identified individually and counted exactly once per crossing direction.
-
----
-
-## Table of contents
-
-- [Project structure](#project-structure)
-- [Setup](#setup)
-- [Usage](#usage)
-- [Drawing a custom counting line](#drawing-a-custom-counting-line)
-- [Configuration](#configuration)
-- [Roadmap](#roadmap)
-
----
+- Detects people with a YOLO11 or RT-DETR model
+- Tracks each person across frames with ByteTrack
+- Counts entries and exits separately when someone crosses a virtual line
+- The line can be horizontal or drawn at any angle
+- Draws boxes, IDs, the line and running totals on the output video
+- Runs on CPU, no GPU needed
 
 ## Project structure
 
 ```
-project_root/
-├── Models/              # model weight files (yolo11m.pt, rtdetr-l.pt, etc.)
-├── Test/                 # your test videos
-├── Output/                # annotated output videos land here by default
-├── Line_Config/            # saved line.json files from tools/select_line.py
-├── tools/
-│   └── select_line.py     # interactive line-drawing tool
-├── footfall_counter.py     # main script
-├── environment.yml
-├── requirements.txt
-└── README.md
+Models/              model weights (downloaded here on first run)
+Test/                test videos
+Output/              annotated output videos
+Line_Config/         saved line files
+tools/select_line.py tool to draw the counting line
+footfall_counter.py  main script
+environment.yml
+requirements.txt
 ```
 
 ## Setup
 
-Requires [Conda](https://docs.conda.io/en/latest/miniconda.html). No GPU needed — everything runs on CPU.
+You need [Conda](https://docs.conda.io/en/latest/miniconda.html).
 
 ```bash
 conda env create -f environment.yml
@@ -59,79 +38,67 @@ conda activate footfall-detection
 
 ## Usage
 
-**Video file, with a live preview window:**
+Video file with a live preview:
 
 ```bash
 python footfall_counter.py --source Test/input.mp4 --model yolo11m --show
 ```
 
-**Video file, save only (no live window, a bit faster):**
+Video file, save only:
 
 ```bash
 python footfall_counter.py --source Test/input.mp4 --model yolo11m --output Output/result.mp4
 ```
 
-**Live webcam:**
+Webcam:
 
 ```bash
 python footfall_counter.py --webcam 0 --model yolo11m
 ```
 
-**Model names** — just the short name, no path or `.pt` extension needed:
+If `--output` is not given, the result is saved to `Output/<source-name>_output.mp4`.
 
-```
---model yolo11x    -> resolves to Models/yolo11x.pt
---model yolo11l    -> resolves to Models/yolo11l.pt
---model yolo11m    -> resolves to Models/yolo11m.pt
---model yolo11s    -> resolves to Models/yolo11s.pt
---model yolo11n    -> resolves to Models/yolo11n.pt
---model rtdetr-l   -> resolves to Models/rtdetr-l.pt
-```
-
-If the weight file isn't already in `Models/`, it downloads there automatically on first run.
-
-If `--output` isn't given, it auto-saves to `Output/<source-filename>_output.mp4`.
+Model names are short names without the `.pt` extension, for example `yolo11m` or `rtdetr-l`. The weights are looked up in `Models/` and downloaded there if missing.
 
 ## Drawing a custom counting line
 
-By default the line is horizontal at 50% frame height (`--line-ratio` moves it up/down). For a line at any angle — matching a real doorway, gate, or corridor at whatever camera angle you have:
+By default the line is horizontal at the middle of the frame. Use `--line-ratio` to move it up or down.
 
-**1. Draw it once, on the video's first frame:**
+To draw a line at any angle, run the tool on the first frame of your video:
 
 ```bash
 python tools/select_line.py --source Test/input.mp4
 ```
 
-| Control | Action |
+| Key | Action |
 |---|---|
-| Left-click | Place a point (2 points define the line) |
-| `s` | Save (defaults to `Line_Config/line.json`) |
-| `u` | Undo last point |
-| `q` | Cancel without saving |
+| Left click | Place a point (two points make the line) |
+| `s` | Save to `Line_Config/line.json` |
+| `u` | Undo the last point |
+| `q` | Quit without saving |
 
-**2. Use it when running the counter:**
+Then pass the saved file to the counter:
 
 ```bash
 python footfall_counter.py --source Test/input.mp4 --model yolo11m --show --line-config Line_Config/line.json
 ```
 
-For a live webcam, no separate step is needed — a window opens automatically before detection starts, prompting you to click 2 points (ENTER/SPACE to confirm, `r` to reset, `q`/ESC to abort).
+With a webcam, a window opens before detection starts. Click two points, press Enter or Space to confirm, `r` to reset, or `q` / Esc to quit.
 
-## Configuration
+## Options
 
 | Flag | Description | Default |
 |---|---|---|
-| `--source` | Path to a video file | — |
-| `--webcam` | Webcam index instead of `--source` | — |
-| `--output` | Output video path | auto: `Output/<name>_output.mp4` |
-| `--model` | Model name — `yolo11n` / `yolo11s` / `yolo11m` / `yolo11l` / `rtdetr-l` | `yolo11m` |
+| `--source` | Path to a video file | none |
+| `--webcam` | Webcam index, used instead of `--source` | none |
+| `--output` | Output video path | `Output/<name>_output.mp4` |
+| `--model` | `yolo11n`, `yolo11s`, `yolo11m`, `yolo11l`, `yolo11x` or `rtdetr-l` | `yolo11m` |
 | `--conf` | Detection confidence threshold | `0.3` |
-| `--line-ratio` | Horizontal line position, `0`=top `1`=bottom | `0.5` |
-| `--line-config` | Path to a `line.json` for a custom-angle line (overrides `--line-ratio`) | none |
-| `--show` | Show a live preview window while processing | off |
-| `--imgsz` | Inference resolution — higher improves recall on small/crowded people, at the cost of speed | `1280` |
-| `--iou` | NMS IoU threshold — lower it if overlapping people get merged into one box | `0.5` |
-| `--max-det` | Max detections per frame — a safety net for very dense crowds | `1000` |
+| `--line-ratio` | Line position, `0` is top and `1` is bottom | `0.5` |
+| `--line-config` | Path to a `line.json` file (overrides `--line-ratio`) | none |
+| `--show` | Show a live preview window | off |
+| `--imgsz` | Inference size. Larger sizes help with small or crowded people but are slower | `1280` |
+| `--iou` | NMS IoU threshold. Lower it if overlapping people merge into one box | `0.5` |
+| `--max-det` | Maximum detections per frame | `1000` |
 
-**Model choice**, roughly fastest → most accurate: `yolo11n` < `yolo11s` < `yolo11m` (default) < `yolo11l` < `rtdetr-l` < `yolo11x`. Larger/more accurate models are significantly slower on CPU — benchmark on your own hardware before committing to one for production use.
-
+Smaller models are faster and larger ones are more accurate. Larger models are slow on CPU, so test on your own machine first.
